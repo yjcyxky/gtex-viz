@@ -17,6 +17,7 @@ const plugins = [
     replace({
         ENV: JSON.stringify(process.env.NODE_ENV || 'development'),
     }),
+    commonjs(),
     (process.env.NODE_ENV === 'prod' && terser()) // uglify for production: NODE_ENV=prod rollup -c
 ];
 
@@ -56,7 +57,7 @@ const prodTasks = [
                 'file-saver': 'saveAs'
             }
         },
-        external: ['jquery', 'file-saver'],
+        external: ['file-saver'],
         plugins: plugins
     },
     // {
@@ -71,7 +72,7 @@ const prodTasks = [
     //             'file-saver': 'saveAs'
     //         }
     //     },
-    //     external: ['jquery', 'file-saver'],
+    //     external: ['file-saver'],
     //     plugins: plugins
     // },
     {
@@ -86,7 +87,7 @@ const prodTasks = [
                 'file-saver': 'saveAs'
             }
         },
-        external: ['jquery', 'file-saver'],
+        external: ['file-saver'],
         plugins: plugins
     }
 ];
@@ -106,7 +107,7 @@ export default (process.env.NODE_ENV === 'prod' ? prodTasks : []).concat([
                 }
             }
         ],
-        external: ['jquery', 'file-saver'],
+        external: ['file-saver'],
         plugins: plugins
     },
     // {
@@ -139,7 +140,7 @@ export default (process.env.NODE_ENV === 'prod' ? prodTasks : []).concat([
                 }
             }
         ],
-        external: ['jquery', 'file-saver'],
+        external: ['file-saver'],
         plugins: plugins
     },
     {
@@ -155,7 +156,7 @@ export default (process.env.NODE_ENV === 'prod' ? prodTasks : []).concat([
             }
         },
         sourcemap: 'inline',
-        external: ['jquery', 'file-saver'],
+        external: ['file-saver'],
         plugins: plugins
     },
     {
@@ -170,7 +171,7 @@ export default (process.env.NODE_ENV === 'prod' ? prodTasks : []).concat([
                 'file-saver': 'saveAs'
             }
         },
-        external: ['jquery', 'file-saver'],
+        external: ['file-saver'],
         plugins: plugins
     }
 ]);
