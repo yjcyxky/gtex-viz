@@ -51,3 +51,8 @@ export function launchSingleCellViolinPlot(
         url
     );
 }
+
+export var GeneExpressionViolinPlot = {
+    launchBulkTissueViolinPlot,
+    launchSingleCellViolinPlot
+}

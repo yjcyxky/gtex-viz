@@ -635,3 +635,7 @@ function _redrawViolinPlot(vplot, ids) {
         callback();
     }    
 }
+
+export var ExpressionViolinPlot = {
+    launch: launch
+};

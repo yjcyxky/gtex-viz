@@ -666,5 +666,8 @@ function _addColorLegendsForGeneModel(dmap, junctionScale, exonScale){
 
     X = X + inc;
     if (junctionScale !== undefined) drawColorLegend("Junction read counts", mapSvg.select("#geneModel"), junctionScale, {x: X, y:Y}, true, 5, 10, {h:20, w:10}, "v");
-
 }
+
+export var TranscriptBrowser = {
+    render: render
+};

@@ -702,3 +702,11 @@ export function groupedViolinPlot(par=violinDemoConfig){
 
 }
 
+export var GTExViz = {
+    heatmap,
+    dendroHeatmap,
+    groupedViolinPlot,
+    transcriptTracks,
+    bubblemap,
+    ldPlot
+};

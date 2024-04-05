@@ -92,8 +92,8 @@ export function render(par, featureId, variantId, tissueId, groupName=undefined,
         return svg;
 
     });
-
-    
-
-
 }
+
+export var QtlViolinPlot = {
+    render
+};

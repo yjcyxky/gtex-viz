@@ -517,3 +517,7 @@ function _updateButtons(options, ids){
     d3.select(`#${ids.buttons.byCell}`).classed("highlight active", !options.byTissue);
     d3.select(`#${ids.buttons.splitViolin}`).classed("highlight active", options.splitViolin);
 }
+
+export var SingleCellExpressionViolinPlot = {
+    launch
+};

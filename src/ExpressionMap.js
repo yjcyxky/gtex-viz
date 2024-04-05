@@ -739,3 +739,9 @@ function _sortTissues (xlist, dmap, tissueDict){
 
 }
 
+export var ExpressionMap = {
+    createDatasetMenu: createDatasetMenu,
+    launchTopExpressed: launchTopExpressed,
+    launch: launch,
+    searchById: searchById
+};

@@ -347,3 +347,7 @@ function _customizeTooltip(plot){
         d3.select(nodes[i]).classed("active-point", false);
     });
 }
+
+export var SingleCellMultiGeneAPM = {
+    launch
+};

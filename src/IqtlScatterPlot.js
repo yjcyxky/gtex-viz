@@ -119,6 +119,6 @@ function parseIeqtlData(input){
     return data;
 }
 
-export {
+export var IqtlScatterPlot = {
     render
 };

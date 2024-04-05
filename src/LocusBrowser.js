@@ -1467,3 +1467,10 @@ const DefaultConfig = {
     }
 };
 
+export var LocusBrowser = {
+    init: init,
+    createSvg: _createSvg,
+    data: data,
+    dataUrls: dataUrls,
+    vizComponents: vizComponents
+};

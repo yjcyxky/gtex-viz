@@ -308,5 +308,6 @@ function bindSliderEvents(domId, variant, variants, ld){
     });
 }
 
-
-
+export var LocusBrowserVC = {
+    init
+};
