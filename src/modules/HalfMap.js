@@ -5,10 +5,10 @@
 
 "use strict";
 import Tooltip from "./Tooltip";
-import {drawColorLegend, setColorScale} from "./colors";
-import {select, selectAll, mouse, event} from "d3-selection";
+import {drawColorLegend, setColorScale} from "../utils/color-utils";
+import {select, mouse } from "d3-selection";
 import {nest} from "d3-collection";
-import {scaleBand, scaleLinear} from "d3-scale";
+import {scaleBand} from "d3-scale";
 
 
 export default class HalfMap{
@@ -40,19 +40,39 @@ export default class HalfMap{
         this.xScale = undefined;
         this.yScale = undefined;
         this.labelScale = undefined;
+        this.svg = undefined;
+        this.canvas = undefined;
+        this.config = undefined;
 
         // peripheral features
         this.tooltip = undefined;
     }
 
-    addTooltip(parentId){
-        let tooltipId = parentId + '-tooltip';
-        if ($(`#${tooltipId}`).length == 0) $('<div/>').attr('id', tooltipId).appendTo($(`#${parentId}`));
-        this.tooltip = new Tooltip(tooltipId, false, 40, 0);
-        select(`#${tooltipId}`).classed('half-map-tooltip', true);
+    saveSvgObj(svg){
+        this.svg = svg;
+    }
+    saveCanvasObj(canvas){
+        this.canvas = canvas;
     }
 
-    draw(canvas, svg, dimensions={w:600, top:20, left:20}, colorScaleDomain=[0,1], showLabels=true, labelAngle=90, xScaleDomain=undefined, yScaleDomain=undefined){
+    saveConfig(config){
+        this.config = config;
+    }
+
+    addTooltip(parentId){
+        if (select(`#${parentId}`).empty()) throw "DOM ID is missing: " + parentId;
+        let tooltipId = parentId + "-tooltip";
+        if (select(`#${tooltipId}`).empty()) select(`#${parentId}`).append("div").attr("id", tooltipId);
+        this.tooltip = new Tooltip(tooltipId, false, 40, 0);
+        select(`#${tooltipId}`).classed("half-map-tooltip", true);
+    }
+
+    redraw(xDomain, yDomain, range=undefined, colorScaleDomain=[0, 1], showLabels=false, labelAngle=undefined){
+        if (range !== undefined) this.config.w = Math.abs(range[1]-range[0]);
+        this.draw(this.canvas, this.svg, this.config, colorScaleDomain, showLabels, labelAngle, xDomain, yDomain);
+    }
+
+    draw(canvas, svg, dimensions={w:600, top:20, left:20}, colorScaleDomain=[0,1], showLabels=false, labelAngle=90, xScaleDomain=undefined, yScaleDomain=undefined){
         this._drawCanvas(canvas, dimensions, colorScaleDomain, xScaleDomain, yScaleDomain);
         let drawCells = false;
         this.drawSvg(svg, dimensions, drawCells, showLabels, labelAngle, colorScaleDomain, xScaleDomain, yScaleDomain);
@@ -70,12 +90,12 @@ export default class HalfMap{
     }
     _drawCanvas(canvas, dimensions={w:600, top:20, left:20}, colorScaleDomain=[0,1], xScaleDomain=undefined, yScaleDomain=undefined){
         this._setScales(dimensions, colorScaleDomain, xScaleDomain, yScaleDomain);
-        let context = canvas.node().getContext('2d');
+        let context = canvas.node().getContext("2d");
 
         // transform the canvas
         context.save();
-        context.translate(dimensions.left , dimensions.top + (this.xScale.bandwidth()*Math.sqrt(2)/2)); // shift the radius distance...
         context.rotate(Math.PI*(-45/180)); // rotate counterclockwise (negative) 45 degrees
+
         context.clearRect(-dimensions.w,-dimensions.w,dimensions.w*2, dimensions.w*2);
         // LD canvas rendering from GEV old code
         this.filteredData.forEach((d)=>{
@@ -86,9 +106,9 @@ export default class HalfMap{
             context.fillStyle = this.colorScale(d.value);
             context.fillRect(x, y, this.xScale.bandwidth(), this.yScale.bandwidth());
             // uncomment the following for debugging
-            // context.textAlign = 'left';
-            // context.fillStyle = 'white';
-            // context.font = '10px Open Sans';
+            // context.textAlign = "left";
+            // context.fillStyle = "white";
+            // context.font = "10px Open Sans";
             // context.fillText(d.x, x+10, y+10);
             // context.fillText(d.y, x+10, y+30);
         });
@@ -97,6 +117,7 @@ export default class HalfMap{
 
     drawSvg(svg, dimensions, drawCells=true, showLabels=true, labelAngle=90, colorScaleDomain=[0,1], xScaleDomain, yScaleDomain=undefined){
         if (drawCells){
+            // usually this is not rendered when the canvas is done
             this._setScales(dimensions, colorScaleDomain, xScaleDomain, yScaleDomain);
             let mapG = svg.append("g")
                 .attr("clip-path", "url(#clip)");
@@ -113,9 +134,9 @@ export default class HalfMap{
                 .attr("height", this.yScale.bandwidth())
                 .attr("x", (d)=>this.xScale(d.x))
                 .attr("y", (d)=>this.yScale(d.y))
-                .attr("transform", `rotate(-45)`)
+                .attr("transform", "rotate(-45)")
                 .merge(cells)
-                .style("fill", (d)=>d.value==0?"#fff":this.useLog?this.colorScale(this._log(d.value)):this.colorScale(d.value))
+                .style("fill", (d)=>d.value==0?"#fff":this.useLog?this.colorScale(this._log(d.value)):this.colorScale(d.value));
         }
 
         if(showLabels){
@@ -129,17 +150,17 @@ export default class HalfMap{
                 .attr("text-anchor", "start")
                 .style("cursor", "none")
                 .attr("transform", (d) => {
-                    let x = this.labelScale(d) + this.labelScale.step()/2;
+                    let x = this.labelScale(d) - this.labelScale.step()/2;
                     let y = -5;
                     return `translate(${x}, ${y}) rotate(-${labelAngle})`;
                 })
-                .text((d)=>d)
+                .text((d)=>d);
         }
 
-        let cursor = svg.append('rect')
-            .attr('class', 'half-map-cursor')
+        let cursor = svg.append("rect")
+            .attr("class", "half-map-cursor")
             .attr("x", 0)
-            .attr("y", 0)
+            .attr("y",0)
             .attr("width", this.xScale.bandwidth())
             .attr("height", this.yScale.bandwidth())
             .style("stroke", "#d2111b")
@@ -147,23 +168,25 @@ export default class HalfMap{
             .style("fill", "none")
             .style("display", "none");
 
-        svg.on('mouseout', ()=>{
+        svg.on("mouseout", ()=>{
             cursor.style("display", "none");
             this.tooltip.hide();
-            svg.selectAll('.half-map-label').classed('highlighted', false);
+            svg.selectAll(".half-map-label").classed("highlighted", false);
         });
         select(svg.node().parentNode)
             .style("cursor", "none")
             .style("position", "absolute")
-            .on('mousemove', () => {
+            .on("mousemove", () => {
                 let pos = mouse(svg.node()); // retrieve the mouse position relative to the SVG element
                 let x = pos[0];
                 let y = pos[1];
 
                 // find the colliding cell's coordinates (before transformation)
                 let radian = Math.PI*(45/180); // the radian at 45 degree angle
-                let x2 = x*Math.cos(radian) - y*Math.sin(radian) + this.xScale.step()/2;
-                let y2 = x*Math.sin(radian) + y*Math.cos(radian) - this.yScale.step()/2;
+                // let x2 = x*Math.cos(radian) - y*Math.sin(radian) - this.xScale.bandwidth()/2;
+                // let y2 = x*Math.sin(radian) + y*Math.cos(radian) - this.yScale.bandwidth()/2;
+                let x2 = x*Math.cos(radian) - y*Math.sin(radian);
+                let y2 = x*Math.sin(radian) + y*Math.cos(radian);
                 if (x < 0 || y<0 || x2 < 0 || y2<0) {
                     this.tooltip.hide();
                     cursor.style("display", "none");
@@ -175,27 +198,26 @@ export default class HalfMap{
                 let col = this.xScale.domain()[i];
                 let row = this.yScale.domain()[j];
                 let cell = this.dataDict[col+row];
-                // console.log([x, y, x2, y2, col, row]); // debugging
+                // console.log([x, y, x2, y2, i, j, col, row]); // debugging
                 if (cell !== undefined) {
-                    cursor.attr('transform', `translate(${x},${y}) rotate(-45)`);
+                    cursor.attr("transform", `translate(${x},${y}) rotate(-45)`);
                     cursor.style("display", "block");
-
-                    this.tooltip.show(`${col}<br/> ${row}<br/> Value: ${cell.displayValue}`);
+                    const tooltipData = [
+                        `<span class="tooltip-key">Variant 1</span>: <span class="tooltip-value">${col}</span>`,
+                        `<span class="tooltip-key">Variant 2</span>: <span class="tooltip-value">${row}</span>`,
+                        `<span class="tooltip-key">LD Value</span>: <span class="tooltip-value">${cell.displayValue}</span>`,
+                    ];
+                    this.tooltip.show(tooltipData.join("<br/>"));
                     if(showLabels){
-                        svg.selectAll('.half-map-label').classed('highlighted', false); // clear previous highlighted labels
-                        svg.select(`.l${i}`).classed('highlighted', true);
-                        svg.select(`.l${j}`).classed('highlighted', true);
+                        svg.selectAll(".half-map-label").classed("highlighted", false); // clear previous highlighted labels
+                        svg.select(`.l${i}`).classed("highlighted", true);
+                        svg.select(`.l${j}`).classed("highlighted", true);
                     }
                 } else {
                     this.tooltip.hide();
                     cursor.style("display", "none");
                 }
-            })
-            // .on('mouseout', () => {
-            //     // cursor.style("display", "none");
-            //     // this.tooltip.hide();
-            //     // svg.selectAll('.half-map-label').classed('highlighted', false);
-            // })
+            });
     }
 
     _unique(data){
@@ -257,15 +279,14 @@ export default class HalfMap{
     _setXScale(dim={w:600}, xList=undefined){
         if (xList === undefined){
             xList = nest()
-            .key((d) => d.x) // group this.data by d.x
-            .entries(this.data)
-            .map((d) => d.key) // then return the unique list of d.x
-            .sort((a, b) => {return a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;});
+                .key((d) => d.x) // group this.data by d.x
+                .entries(this.data)
+                .map((d) => d.key) // then return the unique list of d.x
+                .sort((a, b) => {return a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;});
         }
 
         this.xScale = scaleBand() // reference: https://github.com/d3/d3-scale#scaleBand
             .domain(xList) // perhaps it isn't necessary to store xList, it could be retrieved by xScale.domain
-            // .range([dim.left, dim.left+(dim.w/Math.sqrt(2))])
             .range([0, dim.w/Math.sqrt(2)])
             .padding(.05); // temporarily hard-coded value
     }
@@ -275,15 +296,14 @@ export default class HalfMap{
         // reference: https://github.com/d3/d3-collection#nests
         if (yList === undefined){
             yList = nest()
-            .key((d) => d.y) // group this.data by d.x
-            .entries(this.data)
-            .map((d) => d.key) // then return the unique list of d.x
-            .sort((a, b) => {return a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;});
+                .key((d) => d.y) // group this.data by d.x
+                .entries(this.data)
+                .map((d) => d.key) // then return the unique list of d.x
+                .sort((a, b) => {return a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;});
         }
 
         this.yScale = scaleBand() // reference: https://github.com/d3/d3-scale#scaleBand
             .domain(yList) // perhaps it isn't necessary to store xList, it could be retrieved by xScale.domain
-            // .range([dim.top, dim.top+(dim.w/Math.sqrt(2))])
             .range([0, dim.w/Math.sqrt(2)])
             .padding(.05); // temporarily hard-coded value
     }
@@ -294,7 +314,7 @@ export default class HalfMap{
         this.labelScale = scaleBand()
             .domain(xList)
             .range([0, dim.w])
-            .padding(.05)
+            .padding(.05);
     }
 
     _setColorScale(domain){

@@ -3,19 +3,24 @@
  * Licensed under the BSD 3-clause license (https://github.com/broadinstitute/gtex-viz/blob/master/LICENSE.md)
  */
 "use strict";
-import {json} from "d3-fetch";
 import {select} from "d3-selection";
 import {range} from "d3-array";
 import {getGtexUrls, parseTissues} from "./gtexDataParser";
+import {RetrieveAllPaginatedData} from "../utils/pagination";
+// import $ from "jquery";
 
 /**
  * Create the tissue (dataset) dropdown menu using select2
+ * NOTE: if using this function, you will need to remove the jquery $ import from webpack,
+ * and rely on jquery imported through a script tag on the index.html page.
+ * This occurs for the Top Expressed Gene visualization.
+ * 
  * @param domId {String} the dom ID of the menu
  * @param url {String} the tissue web service url
  * dependency: select2
  */
 export function createTissueMenu(domId, url = getGtexUrls().tissue){
-    json(url, {credentials: 'include'})
+    RetrieveAllPaginatedData(url)
         .then(function(results){
             let tissues = parseTissues(results);
             tissues.forEach((d) => {
@@ -30,12 +35,12 @@ export function createTissueMenu(domId, url = getGtexUrls().tissue){
 
             // external library dependency: select2
             $(`#${domId}`).select2({
-                placeholder: 'Select a data set',
+                placeholder: "Select a data set",
                 data: tissues
             });
 
         })
-        .catch(function(err){console.error(err)});
+        .catch(function(err){console.error(err);});
 }
 
 /**
@@ -58,35 +63,35 @@ export function createTissueGroupMenu(groups, domId, forEqtl=false, checkAll=fal
     select(`#${domId}`).selectAll("*").remove();
 
     // add check all and reset options
-    const $allTissueDiv = $('<div/>').attr('class', 'col-xs-12 col-md-12').appendTo($(`#${domId}`));
+    const $allTissueDiv = $("<div/>").attr("class", "col-xs-12 col-md-12").appendTo($(`#${domId}`));
     if (forEqtl){
         $(`<label class=${mainClass}>` +
-        '<input type="radio" name="allTissues" value="reset"> Reset ' +
-        '</label><br/>').appendTo($allTissueDiv);
+        "<input type=\"radio\" name=\"allTissues\" value=\"reset\"> Reset " +
+        "</label><br/>").appendTo($allTissueDiv);
     } else {
         $(`<label class=${mainClass}>` +
-        '<input type="radio" name="allTissues" value="all"> All </label> ' +
+        "<input type=\"radio\" name=\"allTissues\" value=\"all\"> All </label> " +
         `<label class=${mainClass}>` +
-        '<input type="radio" name="allTissues" value="reset"> Reset ' +
-        '</label><br/>').appendTo($allTissueDiv);
+        "<input type=\"radio\" name=\"allTissues\" value=\"reset\"> Reset " +
+        "</label><br/>").appendTo($allTissueDiv);
     }
 
 
     // check all or reset events
-    $('input[name="allTissues"]').change(function(){
+    $("input[name=\"allTissues\"]").change(function(){
         let val = $(this).val();
         switch(val){
-            case 'all': {
-                $('.tissueGroup').prop('checked', true);
-                $('.tissueSubGroup').prop('checked', true);
-                break;
-            }
-            case 'reset': {
-                $('.tissueGroup').prop('checked', false);
-                $('.tissueSubGroup').prop('checked', false);
-                break;
-            }
-            default:
+        case "all": {
+            $(".tissueGroup").prop("checked", true);
+            $(".tissueSubGroup").prop("checked", true);
+            break;
+        }
+        case "reset": {
+            $(".tissueGroup").prop("checked", false);
+            $(".tissueSubGroup").prop("checked", false);
+            break;
+        }
+        default:
                 // do nothing
 
         }
@@ -95,8 +100,8 @@ export function createTissueGroupMenu(groups, domId, forEqtl=false, checkAll=fal
     // sort the tissue groups alphabetically
     let groupNames = Object.keys(groups).sort((a, b) => {
         // regular sorting, except that 'Brain' group will always be first
-        if (a == 'Brain') return -1;
-        if (b == 'Brain') return 1;
+        if (a == "Brain") return -1;
+        if (b == "Brain") return 1;
         if (a < b) return -1;
         if (a > b) return 1;
     });
@@ -109,8 +114,11 @@ export function createTissueGroupMenu(groups, domId, forEqtl=false, checkAll=fal
 
     let rowsPerSection = Math.ceil(rows/sections);
     let rowsRemain = rows % sections;
-    let colSize = Math.floor(12/sections); // for bootstrap grid
-    const $sections = range(0, sections).map(d=>{
+
+    // Bootstrap grid
+    const bootstrapGrids = 12;
+    let colSize = Math.floor(bootstrapGrids/sections); // for bootstrap grid
+    const sectionDoms = range(0, sections).map(d=>{
         return $(`<div id="section${d}" class="col-xs-12 col-md-${colSize}">`).appendTo($(`#${domId}`));
     });
 
@@ -125,60 +133,62 @@ export function createTissueGroupMenu(groups, domId, forEqtl=false, checkAll=fal
         // move to new section if enough rows are in the current section
         if (counter != 0 && groupLen + counter > rowsPerSection + rowsRemain) {
             counter = 0;
-            currSection += 1;
+            if (sectionDoms.length != currSection + 1){
+                currSection += 1;
+            }
         }
         counter += groupLen;
-        let $currentDom = $sections[currSection];
-
+        let $currentDom = sectionDoms[currSection];
+        if ($currentDom===undefined) console.error(`${gname} has no defined session`);
         // create the <label> for the tissue group
         $(`<label class=${mainClass}>`+
             `<input type="checkbox" id="${gId}" class="tissueGroup"> ` +
             `<span>${gname}</span>` +
-            '</label><br/>').appendTo($currentDom);
+            "</label><br/>").appendTo($currentDom);
 
         // tissue sites in the group
         if (sites.length > 1){
-             // sort sites alphabetically
+            // sort sites alphabetically
             sites.sort((a, b)=>{
                 if (a.id > b.id) return 1;
                 if (a.id < b.id) return -1;
                 return 0;
             })
-            .forEach(function(site, i){
-                let $siteDom = $(`<label class=${subClass}>`+
+                .forEach(function(site, i){
+                    let $siteDom = $(`<label class=${subClass}>`+
                                 `<input type="checkbox" id="${site.id}" class="tissueSubGroup"> ` +
                                 `<span>${site.name}</span>` +
-                                '</label><br/>').appendTo($currentDom);
-                if (i == sites.length -1) $siteDom.addClass(lastSiteClass);
-                $siteDom.click(function(){
-                    $('input[name="allTissues"]').prop('checked', false);
-                })
-            });
+                                "</label><br/>").appendTo($currentDom);
+                    if (i == sites.length -1) $siteDom.addClass(lastSiteClass);
+                    $siteDom.click(function(){
+                        $("input[name=\"allTissues\"]").prop("checked", false);
+                    });
+                });
         }
 
         // custom click event for the top-level tissues: toggle the check boxes
         $("#" + gId).click(function(){
-            $('input[name="allTissues"]').prop('checked', false);
-            if ($('#' + gId).is(":checked")) {
+            $("input[name=\"allTissues\"]").prop("checked", false);
+            if ($("#" + gId).is(":checked")) {
                 // when the group is checked, check all its tissues
                 sites.forEach(function (site) {
                     if ("id" == site.id) return;
-                    $('#' + site.id).prop('checked', true);
+                    $("#" + site.id).prop("checked", true);
                 });
             }
             else {
                 // when the group is unchecked, un-check all its tissues
                 sites.forEach(function (site) {
                     if ("id" == site.id) return;
-                    $('#' + site.id).prop('checked', false);
+                    $("#" + site.id).prop("checked", false);
                 });
             }
         });
     });
     if (checkAll) {
-        $('input[name="allTissues"][value="all"]').prop('checked', true);
-        $('.tissueGroup').prop('checked', true);
-        $('.tissueSubGroup').prop('checked', true);
+        $("input[name=\"allTissues\"][value=\"all\"]").prop("checked", true);
+        $(".tissueGroup").prop("checked", true);
+        $(".tissueSubGroup").prop("checked", true);
     }
 }
 
@@ -193,7 +203,7 @@ export function parseTissueGroupMenu(groups, domId, useNames=false){
     let queryTissues = [];
     $(`#${domId}`).find(":input").each(function(){ // using jQuery to parse each input item
         if ( $(this).is(":checked")) { // the jQuery way to fetch a checked tissue
-            const id = $(this).attr('id');
+            const id = $(this).attr("id");
             if ($(this).hasClass("tissueGroup")){
                 // this input item is a tissue group
                 // check if this tissue group is a single-site group using the tissueGroups dictionary

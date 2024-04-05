@@ -30,7 +30,7 @@ export default class IsoformTrackViewer {
 
     showData(data, colorScale, barScale, dataLabel, sort=true){
         if (sort){
-            data.sort((a,b)=>{return -(a.displayValue - b.displayValue)}); // first sort the expression data
+            data.sort((a,b)=>{return -(a.displayValue - b.displayValue);}); // first sort the expression data
             const ids = data.map((d)=>d.transcriptId);
             this.sortTracks(ids);
         }
@@ -38,14 +38,14 @@ export default class IsoformTrackViewer {
         data.forEach((d)=>{
             const isoform = this.visualDom.select(`#${d.transcriptId.replace(".", "_")}`);
             isoform.selectAll(".exon-curated")
-                .style("fill", d.value==0?this.nullColor:colorScale(d.value))
+                .style("fill", d.value==0?this.nullColor:colorScale(d.value));
         });
 
         // render the lollipop graph
         this.visualDom.select(".lollipopGraph").remove();
         const lollipopGraph = this.visualDom.append("g")
             .classed("lollipopGraph", true)
-            .attr("transform", `translate(-100, 13)`); // TODO: remove hard-coded values
+            .attr("transform", "translate(-100, 13)"); // TODO: remove hard-coded values
 
         const lollipops = lollipopGraph.selectAll(".lollipop")
             .data(data);
@@ -88,14 +88,14 @@ export default class IsoformTrackViewer {
             .attr("y", -40)
             .attr("text-anchor", "end")
             .style("font-size", 9)
-            .text("log10(TPM)"); // TODO: this should be a user-defined text
+            .text("TPM"); // TODO: this should be a user-defined text
 
         lollipopGraph.append("g")
             .attr("class", "lollipop-axis")
             .attr("transform", `translate(0,-${this.yScale.bandwidth()/2})`)
             .call(
                 axisRight(this.yScale)
-                  .tickValues([]) // show no ticks
+                    .tickValues([]) // show no ticks
             );
 
         // data label
@@ -116,7 +116,7 @@ export default class IsoformTrackViewer {
         this.render(true);
     }
 
-    render(redraw=false, dom=undefined, labelOn='left', duration=1000){
+    render(redraw=false, dom=undefined, labelOn="left", duration=1000){
         if (dom === undefined && this.visualDom === undefined) throw "Fatal Error: must provide a dom element";
         if (dom === undefined) dom = this.visualDom;
         else this.visualDom = dom;
@@ -129,19 +129,19 @@ export default class IsoformTrackViewer {
         // update old isoform tracks, if any
         isoTracks.transition()
             .duration(duration)
-            .attr("transform", (d)=>{ return `translate(0, ${this.yScale(d)})`});
+            .attr("transform", (d)=>{ return `translate(0, ${this.yScale(d)})`;});
 
         // update new tracks
         isoTracks.enter()
             .append("g")
             .attr("id", (d)=>(d.replace(".", "_")))
             .attr("class", "isotrack")
-            .attr("transform", (d)=>{ return `translate(0, 0)`})
+            .attr("transform", (d)=>{ return `translate(0, 0)`;})
 
             // .merge(isoTracks)
             .transition()
             .duration(duration/2)
-            .attr("transform", (d)=>{ return `translate(0, ${this.yScale(d)})`});
+            .attr("transform", (d)=>{ return `translate(0, ${this.yScale(d)})`;});
 
         if (redraw) return;
 
@@ -149,7 +149,7 @@ export default class IsoformTrackViewer {
 
     }
 
-    _renderModels(w, labelOn = 'left'){
+    _renderModels(w, labelOn = "left"){
         this.isoforms.forEach((isoform) => {
             let reference = (this.modelExons === undefined || this.modelExons === null)?this.isoformExons[isoform.transcriptId]:this.modelExons;
             const model = new GeneModel(isoform, reference, this.isoformExons[isoform.transcriptId], [], true);

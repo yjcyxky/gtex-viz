@@ -95,11 +95,11 @@
     <script src="/build/js/expression-map.bundle.min.js"></script>
     <script>
         $(document).ready(function(){
-            BatchGeneExpression.createDatasetMenu("datasetSelector");
+            ExpressionMap.createDatasetMenu("datasetSelector");
         });
         $("#datasetSelector").change(function(){
             const tissueId = $(this).val();
-            BatchGeneExpression.launchTopExpressed(tissueId, "heatmapRoot", "violinRoot");
+            ExpressionMap.launchTopExpressed(tissueId, "heatmapRoot", "violinRoot");
         });
 
 

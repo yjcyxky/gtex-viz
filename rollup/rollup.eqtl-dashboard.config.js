@@ -1,18 +1,17 @@
-import nodeResolve from 'rollup-plugin-node-resolve';
-import uglify from 'rollup-plugin-uglify';
-import {minify} from 'uglify-es';
+import { nodeResolve } from '@rollup/plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs';
 
 const name = 'EqtlDashboard';
 export default {
     input:'src/' + name + '.js',
     output: {
         file: 'build/js/eqtl-dashboard.bundle.min.js',
-        format: 'iife'
+        format: 'iife',
+        sourcemap: 'inline',
+        name: name,
     },
-    sourcemap: 'inline',
-    name: name,
     plugins: [
-        nodeResolve({jsnext: true, main: true}),
-        uglify({}, minify)
+        nodeResolve({ jsnext: true, main: true }),
+        commonjs()
     ]
 }

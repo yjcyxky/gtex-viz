@@ -1,6 +1,5 @@
-import nodeResolve from 'rollup-plugin-node-resolve';
-import uglify from 'rollup-plugin-uglify';
-import {minify} from 'uglify-es';
+import { nodeResolve } from '@rollup/plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs';
 
 const name= 'GTExViz';
 export default {
@@ -12,7 +11,7 @@ export default {
         sourcemap: 'inline'
     },
     plugins: [
-        nodeResolve({jsnext: true, main: true}),
-        uglify({}, minify)
+        nodeResolve({ jsnext: true, main: true }),
+        commonjs()
     ]
 }

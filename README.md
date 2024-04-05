@@ -20,7 +20,7 @@ Also, try the tools at [jsFiddle](https://jsfiddle.net/user/kathuang/fiddles/).
 #### Launching the demo
 In the repo's root directory on your computer, start up a simple Python HTTP server, and specify a port (e.g. 9090):
 
-```python -m SimpleHTTPServer 9090```
+```python3 -m http.server 9090```
 
 Once the HTTP server is running, open the demo home page using the following URL in a web browser: 
 
@@ -37,9 +37,13 @@ To install Rollup and required libraries, you may run ```npm install``` in the r
 #### Rollup configuration
 The rollup configuration files for each tool is located in the directory [rollup](/rollup). To recompile a tool (e.g. GTEx Expression Map): run the following command in your local repo's root directory:
 
-```rollup -c rollup/rollup.expression-map.config.js```
+```rollup --bundleConfigAsCjs -c rollup/rollup.expression-map.config.js```
 
 This will recompile and generate a new bundled tool code in the directory `build/js/`.
+
+Compile all js files once:
+
+```ls rollup | xargs -I {} rollup --bundleConfigAsCjs -c rollup/{}```
 
 To minify the bundled code, first set the environment variable NODE_ENV to "prod", for example in a Bash terminal, the command would be:
 ```export NODE_ENV="prod"```

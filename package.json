@@ -9,13 +9,14 @@
   "author": "Katherine Huang",
   "license": "BSD-3-Clause",
   "devDependencies": {
-    "rollup-plugin-copy": "^0.2.3",
-    "rollup-plugin-node-resolve": "^3.3.0",
-    "rollup-plugin-replace": "^2.0.0",
-    "rollup-plugin-uglify": "^2.0.1"
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^13.0.6"
   },
   "dependencies": {
-    "d3": "^5.0.0",
+    "d3": "^5",
+    "file-saver": "^2.0.5",
+    "jquery": "^3.7.1",
+    "rollup": "^4.14.0",
     "uglify-es": "^3.3.9"
   }
 }

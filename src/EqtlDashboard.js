@@ -2,20 +2,20 @@
  * Copyright © 2015 - 2018 The Broad Institute, Inc. All rights reserved.
  * Licensed under the BSD 3-clause license (https://github.com/broadinstitute/gtex-viz/blob/master/LICENSE.md)
  */
-import {json} from "d3-fetch";
+import { median } from "d3-array";
 import {select} from "d3-selection";
-// import {range} from "d3-array";
 import GroupedViolin from "./modules/GroupedViolin";
 import {
     getGtexUrls,
-    parseTissueSites,
-    parseDynEqtl
+    parseDynQtl, parseTissueSites
 } from "./modules/gtexDataParser";
 
 import {
     createTissueGroupMenu,
     parseTissueGroupMenu
 } from "./modules/gtexMenuBuilder";
+
+import {RetrieveAllPaginatedData, RetrieveNonPaginatedData} from "./utils/pagination";
 
 /**
  * Build the eQTL Dashboard
@@ -33,9 +33,8 @@ import {
  * @param urls {Dictionary} of GTEx web service URLs
  */
 export function build(dashboardId, menuId, pairId, submitId, formId, messageBoxId, urls=getGtexUrls()){
-    let tissueGroups = {}; // a dictionary of lists of tissue sites indexed by tissue groups
 
-    json(urls.tissue, {credentials: 'include'})
+    RetrieveAllPaginatedData(urls.tissue)
         .then(function(data){ // retrieve all tissue (sub)sites
             const forEqtl = true;
             let tissueGroups = parseTissueSites(data, forEqtl);
@@ -73,14 +72,14 @@ function _visualize(gene, variant, mainId, input, info){
 
     // error-checking DOM elements
     if ($(`#${id.main}`).length == 0) throw "Violin Plot Error: the chart DOM doesn't exist";
-    if ($(`#${id.tooltip}`).length == 0) $('<div/>').attr("id", id.tooltip).appendTo($('body'));
+    if ($(`#${id.tooltip}`).length == 0) $("<div/>").attr("id", id.tooltip).appendTo($("body"));
 
     // clear previously rendered plot if any
     select(`#${id.main}`).selectAll("*").remove();
 
     // build the dom elements
     ["toolbar", "chart", "clone"].forEach((d)=>{
-        $('<div/>').attr("id", id[d]).appendTo($(`#${id.main}`));
+        $("<div/>").attr("id", id[d]).appendTo($(`#${id.main}`));
     });
 
     // violin plot
@@ -105,38 +104,42 @@ function _visualize(gene, variant, mainId, input, info){
         .append("g")
         .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-    // add violin title
-
-    dom.append("text")
-        .classed("ed-section-title", true)
-        .text(`${gene.geneSymbol} (${gene.gencodeId}) and ${variant.snpId||""} (${variant.variantId})`)
-        .attr("x", 0)
-        .attr("y", -margin.top + 16);
-
     // render the violin
     let violin = new GroupedViolin(input, info);
     const tooltip = violin.createTooltip(id.tooltip);
     const toolbar = violin.createToolbar(id.toolbar, tooltip);
     toolbar.createDownloadSvgButton(id.buttons.save, id.svg, `${id.main}-save.svg`, id.clone);
+    const configs = {
+        x: {show: false, angle: 0, paddingInner:0.01, paddingOuter: 0.01},
+        subx: {show: true, angle: 0, paddingInner: 0, paddingOuter: 0, sort: false},
+        y: {label:"Norm. Expression"},
+        size: {show: true}
+    };
     violin.render(
         dom,
         innerWidth,
         innerHeight,
-        0.3,
         undefined,
-        [],
-        "Norm. Expression",
-        false,
-        0,
-        true,
-        0,
-        false,
-        true,
+        [-3, 3],
+        configs.x,
+        configs.subx,
+        configs.y,
+        configs.size,
         false,
         true,
         false,
-        false);
+        true,
+        10,
+    );
+
+    // add violin title -- must add after the violin renders, or the violin code removes it
+    dom.insert("text", ":first-child")
+        .classed("ed-section-title", true)
+        .text(`${gene.geneSymbol} (${gene.gencodeId}) and ${variant.snpId||""} (${variant.variantId})`)
+        .attr("x", 0)
+        .attr("y", -margin.top + 16);
     _customizeViolinPlot(violin, dom);
+    customizeTooltip(violin, gene, variant);
 }
 /**
  * Customization of the violin plot
@@ -158,13 +161,35 @@ function _customizeViolinPlot(plot, dom){
             .attr("transform", (d, i) => {
                 let x = plot.scale.x(gname) + plot.scale.x.bandwidth()/2;
                 let y = plot.scale.y(plot.scale.y.domain()[0]) + 75 + (12*i); // todo: avoid hard-coded values
-                return `translate(${x}, ${y})`
+                return `translate(${x}, ${y})`;
             })
             .text((d) => d);
     });
 
     dom.selectAll(".violin-size-axis").classed("violin-size-axis-hide", true).classed("violin-size-axis", false);
 
+}
+
+export function customizeTooltip(plot, gene, variant, dashBoard=true, tissue = undefined) {
+    let geneSymbol = gene;
+    let variantId = variant;
+    if (dashBoard){
+        geneSymbol = gene.geneSymbol;
+        variantId = variant.variantId;
+    }
+    plot.dom.selectAll(".violin-g")
+        .on("mouseover", (d, i, nodes) => {
+            select(nodes[i]).classed("highlighted", true);
+            const tooltipData = [
+                `<span class="tooltip-key">Gene</span>: <span class="tooltip-value">${geneSymbol}</span>`,
+                `<span class="tooltip-key">Variant</span>: <span class="tooltip-value">${variantId}</span>`,
+                `<span class="tooltip-key">Tissue</span>: <span class="tooltip-value">${tissue==undefined?d.group:tissue}</span>`,
+                `<span class="tooltip-key">Genotype</span>: <span class="tooltip-value">${d.label}</span>`,
+                `<span class="tooltip-key">Sample size</span>: <span class="tooltip-value">${d.size}</span>`,
+                `<span class="tooltip-key">Median</span>: <span class="tooltip-value">${median(d.values).toPrecision(4)}</span>`,
+            ];
+            plot.tooltip.show(tooltipData.join("<br/>"));
+        });
 }
 
 /**
@@ -180,11 +205,11 @@ function _customizeViolinPlot(plot, dom){
  * @private
  * Dependencies: jQuery
  */
-function _submit(tissueGroups, dashboardId, menuId, pairId, submitId, formId, messageBoxId, urls=_getGTExUrls(), max=30){
+function _submit(tissueGroups, dashboardId, menuId, pairId, submitId, formId, messageBoxId, urls= getGtexUrls(), max=30){
     return function(){
 
         // clear the previous dashboard search results if any
-        $(`#${dashboardId}`).html('');
+        $(`#${dashboardId}`).html("");
 
         ////// validate tissue inputs and convert them to tissue IDs //////
         let queryTissueIds = parseTissueGroupMenu(tissueGroups, menuId);
@@ -196,7 +221,7 @@ function _submit(tissueGroups, dashboardId, menuId, pairId, submitId, formId, me
         }
 
         ////// parse the gene-variant input list //////
-        let pairs = $(`#${pairId}`).val().split("\n").filter(function(d){return d != ""});
+        let pairs = $(`#${pairId}`).val().split("\n").filter(function(d){return d != "";});
         if (pairs.length == 0) {
             alert("Must input at least one gene-variant pair.");
             throw "Input error";
@@ -220,14 +245,17 @@ function _submit(tissueGroups, dashboardId, menuId, pairId, submitId, formId, me
         // for each gene-variant pair
         pairs.forEach(function(pair, i){
             pair.replace(/ /g, ""); // remove all spaces
-            let vid = pair.split(',')[1],
-                gid = pair.split(',')[0];
+            let vid = pair.split(",")[1],
+                gid = pair.split(",")[0];
 
             // retrieve gene and variant info from the web service
             const geneUrl = urls.geneId + gid;
-            const variantUrl = vid.toLowerCase().startsWith('rs')?urls.snp+vid:urls.variantId+vid;
-
-            Promise.all([json(geneUrl, {credentials: 'include'}), json(variantUrl, {credentials: 'include'})])
+            const variantUrl = vid.toLowerCase().startsWith("rs") ? urls.snp+vid:urls.variantId+vid;
+            const promises = [
+                RetrieveAllPaginatedData(geneUrl), 
+                RetrieveAllPaginatedData(variantUrl)
+            ];
+            Promise.all(promises)
                 .then(function(args){
                     const gene = _parseGene(args[0], gid);
                     const variant = _parseVariant(args[1]);
@@ -248,7 +276,7 @@ function _submit(tissueGroups, dashboardId, menuId, pairId, submitId, formId, me
                     // hide the search form after the eQTL violin plots are reported
                     $(`#${formId}`).removeClass("show"); // for bootstrap 4
                     $(`#${formId}`).removeClass("in"); // for boostrap 3
-                    }
+                }
                 )
                 .catch(function(err){
                     console.error(err);
@@ -265,9 +293,9 @@ function _submit(tissueGroups, dashboardId, menuId, pairId, submitId, formId, me
  * @private
  */
 function _parseGene(gjson, id){
-    const attr = 'gene';
-    if(!gjson.hasOwnProperty(attr)) throw 'Fatal Error: parse gene error';
-    let genes = gjson[attr].filter((d) => {return d.geneSymbolUpper == id.toUpperCase() || d.gencodeId == id.toUpperCase()}); // find the exact match
+    //const attr = "gene";
+    //if(!gjson.hasOwnProperty(attr)) throw "Fatal Error: parse gene error";
+    let genes = gjson.filter((d) => {return d.geneSymbolUpper == id.toUpperCase() || d.gencodeId == id.toUpperCase();}); // find the exact match
     if (genes.length ==0) return null;
     return genes[0];
 }
@@ -279,9 +307,9 @@ function _parseGene(gjson, id){
  * @private
  */
 function _parseVariant(vjson){
-    const attr = 'variant';
-    if(!vjson.hasOwnProperty(attr)) throw 'Fatal Error: parse variant error';
-    const variants = vjson[attr];
+    //const attr = "variant";
+    //if(!vjson.hasOwnProperty(attr)) throw "Fatal Error: parse variant error";
+    const variants = vjson;
     if (variants.length == 0) return null;
     return variants[0];
 }
@@ -312,8 +340,7 @@ function _renderEqtlPlot(tissueDict, dashboardId, gene, variant, tissues, i, url
 
     // queue up all tissue IDs
     tissues.forEach((tId) => {
-        let urlRoot = urls['dyneqtl'];
-        // let url = `${urlRoot}?snp_id=${variant.variantId}&gene_id=${gene.gencodeId}&tissue=${tId}`; // use variant ID, gencode ID and tissue ID to query the dyneqtl
+        let urlRoot = urls.dyneqtl;
         let url = `${urlRoot}?variantId=${variant.variantId}&gencodeId=${gene.gencodeId}&tissueSiteDetailId=${tId}`; // use variant ID, gencode ID and tissue ID to query the dyneqtl
         promises.push(_apiCall(url, tId));
     });
@@ -343,10 +370,10 @@ function _renderEqtlPlot(tissueDict, dashboardId, gene, variant, tissues, i, url
                             label: alt.length>2?"alt":alt,
                             values: [0]
                         }
-                    ])
+                    ]);
                 }
                 else {
-                    d = parseDynEqtl(d); // reformat eQTL results d
+                    d = parseDynQtl(d); // reformat eQTL results d
                     let group = tissueDict[d.tissueSiteDetailId]; // group is the tissue name, map tissue ID to tissue name
 
                     input = input.concat([
@@ -373,61 +400,32 @@ function _renderEqtlPlot(tissueDict, dashboardId, gene, variant, tissues, i, url
                     info[group] = {
                         "pvalue": d["pValue"]===null?1:parseFloat(d["pValue"]).toPrecision(3),
                         "pvalueThreshold": d["pValueThreshold"]===null?0:parseFloat(d["pValueThreshold"]).toPrecision(3)
-                    }
+                    };
                 }
 
             });
             _visualize(gene, variant, id, input, info);
         })
-        .catch(function(err){console.error(err)});
+        .catch(function(err){console.error(err);});
 }
-
-// /**
-//  * parse GTEx dyneqtl json
-//  * @param data {JSON} from GTEx dyneqtl web service
-//  * @returns data {JSON} modified data
-//  * @private
-//  */
-// function _parseEqtl(json){
-//     // check required json attributes
-//     ['data', 'genotypes', 'pValue', 'pValueThreshold', 'tissueSiteDetailId'].forEach((d)=>{
-//         if(!json.hasOwnProperty(d)){
-//             console.error(json);
-//             throw 'Parse Error: Required json attribute is missing: ' + d;
-//         }
-//     });
-//
-//     json.expression_values = json.data.map((d)=>parseFloat(d));
-//     json.genotypes = json.genotypes.map((d)=>parseFloat(d));
-//
-//     json.homoRefExp = json.expression_values.filter((d,i) => {
-//         return json.genotypes[i] == 0
-//     });
-//     json.homoAltExp = json.expression_values.filter((d,i) => {
-//         return json.genotypes[i] == 2
-//     });
-//     json.heteroExp = json.expression_values.filter((d,i) => {
-//         return json.genotypes[i] == 1
-//     });
-//     return json;
-// }
 
 function _apiCall(url, tissue){
     // reference: http://adampaxton.com/handling-multiple-javascript-promises-even-if-some-fail/
     return new Promise(function(resolve, reject){
-        json(url, {credentials: 'include'})
+        RetrieveNonPaginatedData(url)
             .then(function(request) {
                 resolve(request);
             })
             .catch(function(err){
                 // report the tissue as failed
+                console.error(err);
                 const failed = {
                     tissue: tissue,
                     status: "failed"
                 };
                 resolve(failed);
             });
-        })
+    });
 
 }
 

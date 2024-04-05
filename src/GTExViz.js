@@ -7,8 +7,9 @@
 TODO
 1. refactoring
  */
-'use strict';
-import {createSvg, generateRandomMatrix, checkDomId, createCanvas} from "./modules/utils";
+"use strict";
+import {createSvg, checkDomId, createCanvas} from "./utils/dom-utils";
+import {generateRandomMatrix} from "./utils/random-utils";
 import {range} from "d3-array";
 import {randomNormal} from "d3-random";
 import Heatmap from "./modules/Heatmap";
@@ -16,7 +17,7 @@ import DendroHeatmapConfig from "./modules/DendroHeatmapConfig";
 import DendroHeatmap from "./modules/DendroHeatmap";
 import GroupedViolin from "./modules/GroupedViolin";
 import IsoformTrackViewer from "./modules/IsoformTrackViewer";
-import BubbleMap from "./modules/BubbleMap";
+// import BubbleMap from "./modules/BubbleMap";
 import HalfMap from "./modules/HalfMap";
 
 export const demoData = {
@@ -25,109 +26,109 @@ export const demoData = {
         rowTree: "(((TP53:0.17,SLK:0.17):1.18,NDRG4:1.34):1.33,ACTN3:2.67);",
         colTree: "(((Adipose Visceral Omentum:0.06,Adipose Subcutaneous:0.06):0.00,Bladder:0.06):0.16,Adrenal Gland:0.22);",
         heatmap: [
-    {
-      "y": "SLK",
-      "value": 35.505,
-      "x": "Adipose Subcutaneous",
-      "unit": "TPM"
-    },
-    {
-      "y": "SLK",
-      "value": 29.28,
-      "x": "Adipose Visceral Omentum",
-      "unit": "TPM"
-    },
-    {
-      "y": "SLK",
-      "value": 17.405,
-      "x": "Adrenal Gland",
-      "unit": "TPM"
-    },
-    {
-      "y": "SLK",
-      "value": 53.29,
-      "x": "Bladder",
-      "unit": "TPM"
-    },
-    {
-      "y": "NDRG4",
-      "value": 12.035,
-      "x": "Adipose Subcutaneous",
-      "unit": "TPM"
-    },
-    {
-      "y": "NDRG4",
-      "value": 6.531000000000001,
-      "x": "Adipose Visceral Omentum",
-      "unit": "TPM"
-    },
-    {
-      "y": "NDRG4",
-      "value": 134.8,
-      "x": "Adrenal Gland",
-      "unit": "TPM"
-    },
-    {
-      "y": "NDRG4",
-      "value": 7.1160000000000005,
-      "x": "Bladder",
-      "unit": "TPM"
-    },
-    {
-      "y": "TP53",
-      "value": 29.935,
-      "x": "Adipose Subcutaneous",
-      "unit": "TPM"
-    },
-    {
-      "y": "TP53",
-      "value": 23.55,
-      "x": "Adipose Visceral Omentum",
-      "unit": "TPM"
-    },
-    {
-      "y": "TP53",
-      "value": 18.515,
-      "x": "Adrenal Gland",
-      "unit": "TPM"
-    },
-    {
-      "y": "TP53",
-      "value": 40.51,
-      "x": "Bladder",
-      "unit": "TPM"
-    },
-    {
-      "y": "ACTN3",
-      "value": 0.33145,
-      "x": "Adipose Subcutaneous",
-      "unit": "TPM"
-    },
-    {
-      "y": "ACTN3",
-      "value": 0.3317,
-      "x": "Adipose Visceral Omentum",
-      "unit": "TPM"
-    },
-    {
-      "y": "ACTN3",
-      "value": 0.100005,
-      "x": "Adrenal Gland",
-      "unit": "TPM"
-    },
-    {
-      "y": "ACTN3",
-      "value": 0.48100000000000004,
-      "x": "Bladder",
-      "unit": "TPM"
-    }
-  ]
+            {
+                "y": "SLK",
+                "value": 35.505,
+                "x": "Adipose Subcutaneous",
+                "unit": "TPM"
+            },
+            {
+                "y": "SLK",
+                "value": 29.28,
+                "x": "Adipose Visceral Omentum",
+                "unit": "TPM"
+            },
+            {
+                "y": "SLK",
+                "value": 17.405,
+                "x": "Adrenal Gland",
+                "unit": "TPM"
+            },
+            {
+                "y": "SLK",
+                "value": 53.29,
+                "x": "Bladder",
+                "unit": "TPM"
+            },
+            {
+                "y": "NDRG4",
+                "value": 12.035,
+                "x": "Adipose Subcutaneous",
+                "unit": "TPM"
+            },
+            {
+                "y": "NDRG4",
+                "value": 6.531000000000001,
+                "x": "Adipose Visceral Omentum",
+                "unit": "TPM"
+            },
+            {
+                "y": "NDRG4",
+                "value": 134.8,
+                "x": "Adrenal Gland",
+                "unit": "TPM"
+            },
+            {
+                "y": "NDRG4",
+                "value": 7.1160000000000005,
+                "x": "Bladder",
+                "unit": "TPM"
+            },
+            {
+                "y": "TP53",
+                "value": 29.935,
+                "x": "Adipose Subcutaneous",
+                "unit": "TPM"
+            },
+            {
+                "y": "TP53",
+                "value": 23.55,
+                "x": "Adipose Visceral Omentum",
+                "unit": "TPM"
+            },
+            {
+                "y": "TP53",
+                "value": 18.515,
+                "x": "Adrenal Gland",
+                "unit": "TPM"
+            },
+            {
+                "y": "TP53",
+                "value": 40.51,
+                "x": "Bladder",
+                "unit": "TPM"
+            },
+            {
+                "y": "ACTN3",
+                "value": 0.33145,
+                "x": "Adipose Subcutaneous",
+                "unit": "TPM"
+            },
+            {
+                "y": "ACTN3",
+                "value": 0.3317,
+                "x": "Adipose Visceral Omentum",
+                "unit": "TPM"
+            },
+            {
+                "y": "ACTN3",
+                "value": 0.100005,
+                "x": "Adrenal Gland",
+                "unit": "TPM"
+            },
+            {
+                "y": "ACTN3",
+                "value": 0.48100000000000004,
+                "x": "Bladder",
+                "unit": "TPM"
+            }
+        ]
     },
     groupedViolinPlot: [
         {
-           group: "Group 1",
-           label: "Gene 1",
-           values: range(0, 2000).map(randomNormal(2, 1))
+            group: "Group 1",
+            label: "Gene 1",
+            values: range(0, 2000).map(randomNormal(2, 1))
         },
         {
             group: "Group 1",
@@ -140,9 +141,9 @@ export const demoData = {
             values: range(0, 2000).map(randomNormal(10, 1))
         },
         {
-           group: "Group 2",
-           label: "Gene 1",
-           values: range(0, 2000).map(randomNormal(5, 1))
+            group: "Group 2",
+            label: "Gene 1",
+            values: range(0, 2000).map(randomNormal(5, 1))
         },
         {
             group: "Group 2",
@@ -155,9 +156,9 @@ export const demoData = {
             values: range(0, 2000).map(randomNormal(1, 1))
         },
         {
-           group: "Group 3",
-           label: "Gene 1",
-           values: range(0, 2000).map(randomNormal(2, 1))
+            group: "Group 3",
+            label: "Gene 1",
+            values: range(0, 2000).map(randomNormal(2, 1))
         },
         {
             group: "Group 3",
@@ -247,8 +248,161 @@ export const demoData = {
     ldPlot: generateRandomMatrix({x:2, y:2, scaleFactor: 1})
 };
 
+export const cfdeDemoData = {
+    groupedViolinByDataset: [
+        {
+            group: "GTEx",
+            label: "Amygdala",
+            values: range(0, 2000).map(randomNormal(2, 3)),
+            color: "#a8cbea"
+        },
+        {
+            group: "GTEx",
+            label: "Cerebellum",
+            values: range(0, 1248).map(randomNormal(5, 1)),
+            color: "#a8cbea"
+        },
+        {
+            group: "GTEx",
+            label: "Cortex",
+            values: range(0, 1568).map(randomNormal(10, 2)),
+            color: "#a8cbea"
+        },
+        {
+            group: "Kids First",
+            label: "Amygdala",
+            values: range(0, 1264).map(randomNormal(2, 1)),
+            color: "#a597a1"
+        },
+        {
+            group: "Kids First",
+            label: "Cerebellum",
+            values: range(0, 975).map(randomNormal(3, 2)),
+            color: "#a597a1"
+        },
+        {
+            group: "Kids First",
+            label: "Cortex",
+            values: range(0, 467).map(randomNormal(5, 4)),
+            color: "#a597a1"
+        }
+    ],
+    groupedViolinByTissue: [
+        {
+            label: "GTEx",
+            group: "Amygdala",
+            values: range(0, 2000).map(randomNormal(2, 3)),
+            color: "#a8cbea"
+        },
+        {
+            label: "GTEx",
+            group: "Cerebellum",
+            values: range(0, 1248).map(randomNormal(5, 1)),
+            color: "#a8cbea"
+        },
+        {
+            label: "GTEx",
+            group: "Cortex",
+            values: range(0, 1568).map(randomNormal(10, 2)),
+            color: "#a8cbea"
+        },
+        {
+            label: "Kids First",
+            group: "Amygdala",
+            values: range(0, 1264).map(randomNormal(2, 1)),
+            color: "#a597a1"
+        },
+        {
+            label: "Kids First",
+            group: "Cerebellum",
+            values: range(0, 975).map(randomNormal(3, 2)),
+            color: "#a597a1"
+        },
+        {
+            label: "Kids First",
+            group: "Cortex",
+            values: range(0, 467).map(randomNormal(5, 4)),
+            color: "#a597a1"
+        }
+    ],
+    groupedViolinBySex: [
+        {
+            label: "GTEx (F)",
+            group: "Amygdala",
+            values: range(0, 978).map(randomNormal(3, 5)),
+            color: "#e67f7b"
+        },
+        {
+            label: "GTEx (M)",
+            group: "Amygdala",
+            values: range(0, 834).map(randomNormal(1, 1)),
+            color: "#70bcd2"
+        },
+        {
+            label: "GTEx (F)",
+            group: "Cerebellum",
+            values: range(0, 745).map(randomNormal(5, 4)),
+            color: "#e67f7b"
+        },
+        {
+            label: "GTEx (M)",
+            group: "Cerebellum",
+            values: range(0, 812).map(randomNormal(5, 2)),
+            color: "#70bcd2"
+        },
+        {
+            label: "GTEx (F)",
+            group: "Cortex",
+            values: range(0, 632).map(randomNormal(10, 3)),
+            color: "#e67f7b"
+        },
+        {
+            label: "GTEx (M)",
+            group: "Cortex",
+            values: range(0, 431).map(randomNormal(1, 1)),
+            color: "#70bcd2"
+        },
+        {
+            label: "Kids First (F)",
+            group: "Amygdala",
+            values: range(0, 1264).map(randomNormal(2, 1)),
+            color: "#e67f7b"
+        },
+        {
+            label: "Kids First (M)",
+            group: "Amygdala",
+            values: range(0, 1264).map(randomNormal(2, 3)),
+            color: "#70bcd2"
+        },
+        {
+            label: "Kids First (F)",
+            group: "Cerebellum",
+            values: range(0, 975).map(randomNormal(3, 4)),
+            color: "#e67f7b"
+        },
+        {
+            label: "Kids First (M)",
+            group: "Cerebellum",
+            values: range(0, 975).map(randomNormal(3, 1)),
+            color: "#70bcd2"
+        },
+        {
+            label: "Kids First (F)",
+            group: "Cortex",
+            values: range(0, 467).map(randomNormal(5, 1)),
+            color: "#e67f7b"
+        },
+        {
+            label: "Kids First (M)",
+            group: "Cortex",
+            values: range(0, 467).map(randomNormal(3, 2)),
+            color: "#70bcd2"
+        }
+    ]
+}
+
 const ldPlotDemoConfig = {
-    id: 'gtexVizLdPlot',
+    id: "gtexVizLdPlot",
     data: demoData.ldPlot,
     cutoff: 0.0,
     width: 1000, // outer width
@@ -264,6 +418,7 @@ const ldPlotDemoConfig = {
     useLog: false,
     logBase: undefined
 };
+
 export function ldPlot(par=ldPlotDemoConfig){
     let margin = {
         left: par.marginLeft,
@@ -283,7 +438,7 @@ export function ldPlot(par=ldPlotDemoConfig){
 }
 
 const transcriptTracksConfig = {
-    id: 'gtexTranscriptTracks',
+    id: "gtexTranscriptTracks",
     data: demoData.transcriptTracks,
     width: 1200,
     height: 80,
@@ -291,7 +446,7 @@ const transcriptTracksConfig = {
     marginRight: 20,
     marginTop: 0,
     marginBottom: 20,
-    labelPos: 'left'
+    labelPos: "left"
 };
 export function transcriptTracks(par=transcriptTracksConfig){
     let margin = {
@@ -307,7 +462,7 @@ export function transcriptTracks(par=transcriptTracksConfig){
     checkDomId(par.id);
 
     // create the SVG
-        let svg = createSvg(par.id, par.width, par.height, margin);
+    let svg = createSvg(par.id, par.width, par.height, margin);
 
     // render the transcripts
     let tooltipId = `${par.id}Tooltip`;
@@ -324,7 +479,7 @@ export function transcriptTracks(par=transcriptTracksConfig){
 }
 
 const bubblemapDemoConfig = {
-    id: 'gtexVizBubblemap',
+    id: "gtexVizBubblemap",
     data: demoData.bubbleMap,
     width: 1200, //window.innerWidth*0.9,
     height: 400, // TODO: use a dynamic width based on the matrix size
@@ -338,16 +493,16 @@ const bubblemapDemoConfig = {
             height: 100,
             angle: 90,
             adjust: 10,
-            location: 'bottom',
-            textAlign: 'left'
+            location: "bottom",
+            textAlign: "left"
         },
         row: {
             show: true,
             width: 150,
             angle: 0,
             adjust: 0,
-            location: 'left',
-            textAlign: 'right'
+            location: "left",
+            textAlign: "right"
         }
     },
     useLog: false,
@@ -356,38 +511,38 @@ const bubblemapDemoConfig = {
     colorScaleDomain: [-0.75, 0.75],
     useCanvas: false
 };
-export function bubblemap(par=bubblemapDemoConfig){
-    let margin = {
-        left: par.showLabels?par.marginLeft + par.rowLabelWidth: par.marginLeft,
-        top: par.marginTop,
-        right: par.marginRight,
-        bottom: par.showLabels?par.marginBottom + par.columnLabelHeight:par.marginBottom
-    };
-    let inWidth = par.width - (par.labels.row.width + par.marginLeft + par.marginRight);
-    let inHeight = par.height - (par.labels.column.height + par.marginTop + par.marginBottom);
-    if(par.useCanvas) {
-        let bmapCanvas = new BubbleMap(par.data, par.useLog, par.logBase, par.colorScheme);
-        bmapCanvas.addTooltip(canvasId);
-        let canvas = createCanvas(par.id, par.width, par.height, margin);
-        bmapCanvas.drawCanvas(
-            canvas,
-            {w:inWidth, h:inHeight, top: margin.top, left: margin.left},
-            par.colorScaleDomain,
-            par.labels
-        )
-    }
-    else {
-        let bmap = new BubbleMap(par.data, par.useLog, par.logBase, par.colorScheme);
-        bmap.addTooltip(par.id);
-        let svg = createSvg(par.id, par.width, par.height, margin);
-        bmap.drawSvg(svg, {w:inWidth, h:inHeight, top:0, left:0}, par.colorScaleDomain, 0, par.labels);
-        bmap.drawColorLegend(svg, {x: 0, y: -40}, 3, "NES");
-        bmap.drawBubbleLegend(svg, {x: 500, y:-40, title: "-log10(p-value)"}, 5, "-log10(p-value)");
-    }
-}
+// export function bubblemap(par=bubblemapDemoConfig){
+//     let margin = {
+//         left: par.showLabels?par.marginLeft + par.rowLabelWidth: par.marginLeft,
+//         top: par.marginTop,
+//         right: par.marginRight,
+//         bottom: par.showLabels?par.marginBottom + par.columnLabelHeight:par.marginBottom
+//     };
+//     let inWidth = par.width - (par.labels.row.width + par.marginLeft + par.marginRight);
+//     let inHeight = par.height - (par.labels.column.height + par.marginTop + par.marginBottom);
+//     if(par.useCanvas) {
+//         let bmapCanvas = new BubbleMap(par.data, par.useLog, par.logBase, par.colorScheme);
+//         bmapCanvas.addTooltip(canvasId);
+//         let canvas = createCanvas(par.id, par.width, par.height, margin);
+//         bmapCanvas.drawCanvas(
+//             canvas,
+//             {w:inWidth, h:inHeight, top: margin.top, left: margin.left},
+//             par.colorScaleDomain,
+//             par.labels
+//         );
+//     }
+//     else {
+//         let bmap = new BubbleMap(par.data, par.useLog, par.logBase, par.colorScheme);
+//         bmap.addTooltip(par.id);
+//         let svg = createSvg(par.id, par.width, par.height, margin);
+//         bmap.drawSvg(svg, {w:inWidth, h:inHeight, top:0, left:0}, par.colorScaleDomain, 0, par.labels);
+//         bmap.drawColorLegend(svg, {x: 0, y: -40}, 3, "NES");
+//         bmap.drawBubbleLegend(svg, {x: 500, y:-40, title: "-log10(p-value)"}, 5, "-log10(p-value)");
+//     }
+// }
 
 const heatmapDemoConfig = {
-    id: 'gtexVizHeatmap',
+    id: "gtexVizHeatmap",
     data: demoData.heatmap,
     width: 1200, // outer width
     height: 300, // outer height
@@ -409,7 +564,7 @@ const heatmapDemoConfig = {
  * Render a 2D Heatmap
  * @param params
  */
-export function heatmap(par=heatmapDemoConfig){
+export function heatmap(par=heatmapDemoConfig, svg=undefined){
     let margin = {
         top: par.marginTop,
         right: par.marginRight,
@@ -423,17 +578,18 @@ export function heatmap(par=heatmapDemoConfig){
     checkDomId(par.id);
 
     // create the SVG
-    let svg = createSvg(par.id, par.width, par.height, margin);
+    if (svg===undefined) svg = createSvg(par.id, par.width, par.height, margin);
 
     // render the heatmap
     let tooltipId = `${par.id}Tooltip`;
     let h = new Heatmap(par.data, par.useLog, par.logBase, par.colorScheme, par.cornerRadius, tooltipId);
     h.draw(svg, {w:inWidth, h:inHeight}, par.columnLabelAngle, false, par.columnLabelPosAdjust);
     h.drawColorLegend(svg, {x:20, y: -20}, 10);
+    return h;
 }
 
 const dendroHeatmapDemoConfig = {
-    id: 'gtexVizDendroHeatmap',
+    id: "gtexVizDendroHeatmap",
     data: demoData.dendroHeatmap,
     useLog: true,
     logBase: 10,
@@ -474,72 +630,71 @@ export function dendroHeatmap(par=dendroHeatmapDemoConfig){
     let svgId = `${par.id}Svg`;
     let tooltipId = `${par.id}Tooltip`;
     let dmapConfig = new DendroHeatmapConfig(par.width, par.rowTreePanelWidth, par.colTreePanelHeight, margin);
-    let dmap = new DendroHeatmap(par.data.colTree, par.data.rowTree, par.data.heatmap, par.colorScheme, par.cornerRadius, dmapConfig, tooltipId, par.useLog, par.logBase)
+    let dmap = new DendroHeatmap(par.data.colTree, par.data.rowTree, par.data.heatmap, par.colorScheme, par.cornerRadius, dmapConfig, tooltipId, par.useLog, par.logBase);
     let showColTree = par.data.colTree !== undefined;
     let showRowTree = par.data.rowTree !== undefined;
     dmap.render(par.id, svgId, showColTree, showRowTree, "top", 8);
 }
 
 const violinDemoConfig = {
-    id: 'gtexGroupedViolinPlot',
+    id: "gtexGroupedViolinPlot",
     data: demoData.groupedViolinPlot,
     width: 500,
     height: 300,
-    marginLeft: 100,
-    marginRight: 20,
-    marginTop: 50,
-    marginBottom: 100,
+    margin: {top: 50, right: 20, bottom: 100, left: 100},
+    xAxis: {
+        show: true,
+        angle: 0,
+        paddingInner: 0.01,
+        paddingOuter: 0.01
+    },
+    subXAxis: {
+        show: true,
+        angle: 0,
+        paddingInner: 0,
+        paddingOuter: 0,
+        sort: false
+    },
+    yAxis: {
+        label: "Random Value"
+    },
+    sizeAxis: {
+        show: true
+    },
     showDivider: true,
-    xPadding: 0.3,
-    yLabel: "Random Value",
-    showSubX: true,
-    showX: true,
-    xAngle: 0,
-    subXAngle: 0,
     showWhisker: false,
     showLegend: false,
-    showSampleSize: true
 };
 export function groupedViolinPlot(par=violinDemoConfig){
-    console.log(par.data);
-    let margin = {
-        top: par.marginTop,
-        right: par.marginRight,
-        bottom: par.marginBottom,
-        left: par.marginLeft
-    };
     // test input params
     checkDomId(par.id);
 
-    let inWidth = par.width - (par.marginLeft + par.marginRight);
-    let inHeight = par.height - (par.marginTop + par.marginBottom);
+    let inWidth = par.width - (par.margin.left + par.margin.right);
+    let inHeight = par.height - (par.margin.top + par.margin.bottom);
 
     let svgId = `${par.id}Svg`;
     let tooltipId = `${par.id}Tooltip`;
 
     // create the SVG
-    let svg = createSvg(par.id, par.width, par.height, margin);
+    let svg = createSvg(par.id, par.width, par.height, par.margin);
 
     const gViolin = new GroupedViolin(par.data);
     gViolin.render(
         svg,
         inWidth,
         inHeight,
-        par.xPadding,
         undefined,
         [],
-        par.yLabel,
-        par.showX,
-        par.xAngle,
-        par.showSubX,
-        par.subXAngle,
+        par.xAxis,
+        par.subXAxis,
+        par.yAxis,
+        par.sizeAxis,
         par.showWhisker,
         par.showDivider,
         par.showLegend,
-        par.showSampleSize,
-        par.sortSubX,
         par.showOutliers,
-        par.numPoints);
+        par.numPoints,
+        par.vColor);
     svg.selectAll(".violin-size-axis").classed("violin-size-axis-hide", true).classed("violin-size-axis", false);
 
     gViolin.createTooltip(tooltipId);

@@ -41,10 +41,11 @@ import {hierarchy} from "d3-hierarchy";
 import {ascending} from "d3-array";
 import {axisBottom, axisLeft} from "d3-axis";
 import {scaleLinear, scaleBand} from "d3-scale";
-import {parseNewick} from "./newick";
+import {select} from "d3-selection";
+import {parseNewick} from "../utils/newick";
 const verbose = false;
 export default class Dendrogram {
-    constructor(newick, orientation='h'){
+    constructor(newick, orientation="h"){
         this.newick = newick;
         this.orientation = orientation;
         this.postorder = [];
@@ -63,7 +64,7 @@ export default class Dendrogram {
         this.height = height;
         this._setXScale();
         this._setYScale();
-        if ('h' == this.orientation) this._drawHTree(dom);
+        if ("h" == this.orientation) this._drawHTree(dom);
         else this._drawVTree(dom);
     }
 
@@ -91,7 +92,7 @@ export default class Dendrogram {
             setY(node);
         });
 
-        dom.selectAll('.branch')
+        dom.selectAll(".branch")
             .data(nodes)
             .enter().append("line")
             .attr("x1", (d) => d.x)
@@ -103,7 +104,7 @@ export default class Dendrogram {
 
         // for all internal nodes
         const inodes = this.root.descendants().filter((d)=>d.height).sort((a,b)=>b.height-a.height);
-        dom.selectAll('.arm')
+        dom.selectAll(".arm")
             .data(inodes)
             .enter().append("line")
             .attr("x1", (d) => d.x)
@@ -113,21 +114,21 @@ export default class Dendrogram {
             .attr("stroke", "gray")
             .attr("stroke-width", 1);
 
-        dom.selectAll('.node')
+        dom.selectAll(".node")
             .data(inodes)
             .enter().append("circle")
             .attr("cx", (d) => d.x)
             .attr("cy", (d) => d.y + this.yScale.bandwidth()/2)
             .attr("r", 2)
-            .attr('fill', '#333')
+            .attr("fill", "#333")
             .attr("opacity", 0.5)
             .attr("class", "dendrogram-node")
             .on("mouseover", function(d){
-                d3.select(this).attr("r", 3);
+                select(this).attr("r", 3);
                 console.log(d.leaves());
             })
-            .on("mouseout", function(d){
-                d3.select(this).attr("r", 2)
+            .on("mouseout", function(){
+                select(this).attr("r", 2);
             });
 
         // axis
@@ -167,7 +168,7 @@ export default class Dendrogram {
             setX(node);
             setY(node);
         });
-        dom.selectAll('.branch')
+        dom.selectAll(".branch")
             .data(nodes)
             .enter().append("line")
             .attr("y1", (d) => d.y)
@@ -179,7 +180,7 @@ export default class Dendrogram {
 
         // for all internal nodes
         const inodes = this.root.descendants().filter((d)=>d.height).sort((a,b)=>b.height-a.height);
-        dom.selectAll('.arm')
+        dom.selectAll(".arm")
             .data(inodes)
             .enter().append("line")
             .attr("y1", (d) => d.y)
@@ -189,21 +190,21 @@ export default class Dendrogram {
             .attr("stroke", "gray")
             .attr("stroke-width", 1);
 
-        dom.selectAll('.node')
+        dom.selectAll(".node")
             .data(inodes)
             .enter().append("circle")
             .attr("cx", (d) => d.x + this.xScale.bandwidth()/2)
             .attr("cy", (d) => d.y)
             .attr("r", 2)
-            .attr('fill', '#333')
+            .attr("fill", "#333")
             .attr("opacity", 0.5)
             .attr("class", "dendrogram-node")
             .on("mouseover", function(d){
-                d3.select(this).attr("r", 3);
+                select(this).attr("r", 3);
                 console.log(d.leaves());
             })
-            .on("mouseout", function(d){
-                d3.select(this).attr("r", 2)
+            .on("mouseout", function(){
+                select(this).attr("r", 2);
             });
 
         // axis
@@ -245,10 +246,10 @@ export default class Dendrogram {
     }
 
     _setXScale(){
-        if ('h' == this.orientation){
+        if ("h" == this.orientation){
             this.xScale = scaleLinear()
                 .domain([0, this._getMaxBranchLength()])
-                .range([0, this.width])
+                .range([0, this.width]);
         } else {
             this._assignPostorder(this.root);
             if (verbose) console.log(this.postorder);
@@ -260,7 +261,7 @@ export default class Dendrogram {
     }
 
     _setYScale(){
-        if ('h' == this.orientation){
+        if ("h" == this.orientation){
             this._assignPostorder(this.root);
             if (verbose) console.log(this.postorder);
             this.yScale = scaleBand()
@@ -270,7 +271,7 @@ export default class Dendrogram {
         } else {
             this.yScale = scaleLinear()
                 .domain([0, this._getMaxBranchLength()])
-                .range([0, this.height])
+                .range([0, this.height]);
         }
     }
 

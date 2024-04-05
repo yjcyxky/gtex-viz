@@ -2,13 +2,12 @@
  * Copyright © 2015 - 2018 The Broad Institute, Inc. All rights reserved.
  * Licensed under the BSD 3-clause license (https://github.com/broadinstitute/gtex-viz/blob/master/LICENSE.md)
  */
-import {createSvg} from "./utils";
+import {createSvg} from "../utils/dom-utils";
 import {select} from "d3-selection";
 
 import DendroHeatmapConfig from "./DendroHeatmapConfig";
 import Dendrogram from "./Dendrogram";
 import Heatmap from "./Heatmap";
-import Tooltip from "./Tooltip";
 import Toolbar from "./Toolbar";
 
 export default class DendroHeatmap {
@@ -23,7 +22,7 @@ export default class DendroHeatmap {
      * @param config {DendroHeatmapConfig}
      * @param useLog {Boolean}
      */
-    constructor(columnTree, rowTree, heatmapData, color="YlGnBu", r=2, config=new DendroHeatmapConfig(), tooltipId="dmapTooltip", useLog=true, base=10, title = ''){
+    constructor(columnTree, rowTree, heatmapData, color="YlGnBu", r=2, config=new DendroHeatmapConfig(), tooltipId="dmapTooltip", useLog=true, base=10, title = ""){
         this.config = config.get();
         //input evaluations
         columnTree = columnTree===undefined||columnTree.startsWith("Not enough data")?undefined:columnTree;
@@ -88,10 +87,10 @@ export default class DendroHeatmap {
             ylist = this.objects.rowTree.yScale.domain();
         }
 
-        if (this.title != '') {
-            select(`#${domId}-svg`).append('text')
-                .attr('x', 0)
-                .attr('y', 20)
+        if (this.title != "") {
+            select(`#${domId}-svg`).append("text")
+                .attr("x", 0)
+                .attr("y", 20)
                 .text(this.title);
         }
 
@@ -109,7 +108,6 @@ export default class DendroHeatmap {
         let svg = this.visualComponents.svg;
         const labelClass = direction=="row"?".exp-map-ylabel":".exp-map-xlabel";
 
-        const tooltip = this.visualComponents.tooltip;
         const g = svg.append("g")
             .attr("id", config.id)
             .attr("transform", `translate(${config.x}, ${config.y})`);

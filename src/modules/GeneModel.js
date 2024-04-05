@@ -31,9 +31,9 @@ export default class GeneModel {
     constructor (gene, exons, exonsCurated, junctions, isIsoform=false, maxIntronLength=1000, minExonWidth=0){
         this.gene = gene;
         this.exons = exons;
-        if (this.gene.strand == "+") this.exons.sort((a, b)=>{return Number(a.exonNumber)-Number(b.exonNumber)});
-        else this.exons.sort((a, b)=>{return Number(b.exonNumber)-Number(a.exonNumber)});
-        this.exonsCurated = exonsCurated.sort((a, b)=>{return Number(a.exonNumber)-Number(b.exonNumber)});
+        if (this.gene.strand == "+") this.exons.sort((a, b)=>{return Number(a.exonNumber)-Number(b.exonNumber);});
+        else this.exons.sort((a, b)=>{return Number(b.exonNumber)-Number(a.exonNumber);});
+        this.exonsCurated = exonsCurated.sort((a, b)=>{return Number(a.exonNumber)-Number(b.exonNumber);});
         this.junctions = junctions.sort((a,b) => {
             if (a.junctionId < b.junctionId) return -1;
             if (a.junctionId > b.junctionId) return 1;
@@ -45,7 +45,7 @@ export default class GeneModel {
         // hard-coded for now
         this.intronLength = 0; // fixed fake intron length in base pairs, obsolete?
         this.minExonWidth = minExonWidth; // minimum exon width in pixels
-        this.nullColor = '#DDDDDD';
+        this.nullColor = "#DDDDDD";
     }
 
     changeTextlabel(dom, label){
@@ -133,7 +133,7 @@ export default class GeneModel {
                 // first filter unmapped junctions
                 d.startExon = this._findExon(d.chromStart);
                 d.endExon = this._findExon(d.chromEnd);
-                return d.startExon !== undefined && d.endExon !== undefined
+                return d.startExon !== undefined && d.endExon !== undefined;
             });
             this.junctions.sort((a,b)=>{
                 // first sort by chromStart
@@ -172,7 +172,7 @@ export default class GeneModel {
 
             // handling edge case: overlapping junctions, add jitter
             // a.reduce((r,k)=>{r[k]=1+r[k]||1;return r},{})
-            const counts = this.junctions.reduce((r,d)=>{r[d.displayName]=1+r[d.displayName]||1;return r},{});
+            const counts = this.junctions.reduce((r,d)=>{r[d.displayName]=1+r[d.displayName]||1;return r;},{});
             this.junctions.forEach((d) => {
                 // jitter
                 if(counts[d.displayName] > 1){ // overlapping junctions
@@ -188,12 +188,12 @@ export default class GeneModel {
                 .curve(curveCardinal);
 
             this.junctions.forEach((d, i) => {
-                        dom.append("path")
-                        .datum([{x:d.startX, y:exonY}, {x:d.cx, y:d.cy}, {x:d.endX, y:exonY}]) // the input points to draw the curve
-                        .attr("class", `junc-curve junc${d.junctionId}`)
-                        .attr("d", curve)
-                        .style("stroke", "#92bcc9");
-                    });
+                dom.append("path")
+                    .datum([{x:d.startX, y:exonY}, {x:d.cx, y:d.cy}, {x:d.endX, y:exonY}]) // the input points to draw the curve
+                    .attr("class", `junc-curve junc${d.junctionId}`)
+                    .attr("d", curve)
+                    .style("stroke", "#92bcc9");
+            });
 
 
             const juncDots = dom.selectAll(".junc")
@@ -214,7 +214,7 @@ export default class GeneModel {
 
             /***** rendering full gene model exons */
             const exonRects = dom.selectAll(".exon")
-            .data(this.exons);
+                .data(this.exons);
 
             // updating elements
             exonRects.attr("x", (d) => d.x);
@@ -225,7 +225,7 @@ export default class GeneModel {
                 .attr("class", (d)=>`exon exon${d.exonNumber}`)
                 .attr("y", exonY)
                 .attr("rx", 2)
-                .attr('ry', 2)
+                .attr("ry", 2)
                 .attr("width", (d) => d.w)
                 .attr("height", 15) // TODO: remove hard-coded values
                 .attr("x", (d) => d.x)
@@ -261,7 +261,7 @@ export default class GeneModel {
 
         // entering new elements
         exonRects2.enter().append("rect")
-            .attr("class", (d)=>this.isIsoform?'exon-curated':`exon-curated exon-curated${d.exonNumber}`)
+            .attr("class", (d)=>this.isIsoform?"exon-curated":`exon-curated exon-curated${d.exonNumber}`)
             .attr("y", exonY)
             .attr("width", (d) => d.w)
             .attr("height", 15) // TODO: remove hard-coded values
@@ -272,25 +272,25 @@ export default class GeneModel {
 
 
         /***** rendering text labels */
-        if (config.labelOn == 'left' || config.labelOn == 'both'){
+        if (config.labelOn == "left" || config.labelOn == "both"){
             dom.append("text")
-            .attr("id", "modelLabel") // TODO: no hard-coded value
-            .attr("text-anchor", "end")
-            .attr("x", this.xScale.range()[0] - 5)
-            .attr("y", exonY + 7.5)
-            .style("font-size", "9px")
-            .text(this.gene.transcriptId===undefined?`${this.gene.geneSymbol}`:this.gene.transcriptId);
+                .attr("id", "modelLabel") // TODO: no hard-coded value
+                .attr("text-anchor", "end")
+                .attr("x", this.xScale.range()[0] - 5)
+                .attr("y", exonY + 7.5)
+                .style("font-size", "9px")
+                .text(this.gene.transcriptId===undefined?`${this.gene.geneSymbol}`:this.gene.transcriptId);
 
 
         }
-        if (config.labelOn == 'right' || config.labelOn == 'both'){
+        if (config.labelOn == "right" || config.labelOn == "both"){
             dom.append("text")
-            .attr("id", "modelLabelRight") // TODO: no hard-coded value
-            .attr("text-anchor", "start")
-            .attr("x", this.xScale.range()[1] + 50)
-            .attr("y", exonY + 7.5)
-            .style("font-size", "9px")
-            .text(this.gene.transcriptId===undefined?`${this.gene.geneSymbol}`:this.gene.transcriptId);
+                .attr("id", "modelLabelRight") // TODO: no hard-coded value
+                .attr("text-anchor", "start")
+                .attr("x", this.xScale.range()[1] + 50)
+                .attr("y", exonY + 7.5)
+                .style("font-size", "9px")
+                .text(this.gene.transcriptId===undefined?`${this.gene.geneSymbol}`:this.gene.transcriptId);
 
         }
     }
@@ -341,7 +341,7 @@ export default class GeneModel {
         // the fixed intron width is calculated as such:
         // ((max(exon length) * exon counts) - total exon length)/(exon counts - 1)
 
-        this.exons.forEach((d) => {d.length = Number(d.chromEnd) - Number(d.chromStart) + 1});
+        this.exons.forEach((d) => {d.length = Number(d.chromEnd) - Number(d.chromStart) + 1;});
         const maxExonLength = max(this.exons, (d)=>d.length);
 
         const domain = [0, maxExonLength*this.exons.length];
@@ -363,7 +363,7 @@ export default class GeneModel {
      */
     _findExon(pos){
         pos = Number(pos);
-        const results = this.exons.filter((d) => {return Number(d.chromStart) - 1 <= pos && Number(d.chromEnd) + 1 >= pos});
+        const results = this.exons.filter((d) => {return Number(d.chromStart) - 1 <= pos && Number(d.chromEnd) + 1 >= pos;});
         if (results.length == 1) return results[0];
         else if(results.length == 0) {
             console.warn("No exon found for: " + pos);
