@@ -18617,7 +18617,7 @@ class GroupedViolin {
  */
 
 function getGtexUrls() {
-  const host = "http://gtexportal.org/api/v2/";
+  const host = "https://gtexportal.org/api/v2/";
   const datasetId = "gtex_v8";
   return {
     // single-cell expression
