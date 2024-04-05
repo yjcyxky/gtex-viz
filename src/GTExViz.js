@@ -707,6 +707,6 @@ export var GTExViz = {
     dendroHeatmap,
     groupedViolinPlot,
     transcriptTracks,
-    bubblemap,
+    // bubblemap,
     ldPlot
 };
