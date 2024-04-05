@@ -1,6 +1,6 @@
 {
   "name": "gtex-d3",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "GTEx D3 Repository",
   "main": "build/gtexViz.js",
   "module": "build/gtexViz.es.js",

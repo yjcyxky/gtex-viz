@@ -29724,11 +29724,11 @@ function render(type, geneId, rootId, urls = getGtexUrls()) {
       const ids = {
         root: rootId,
         svg: `${rootId}-svg`,
-        tooltip: "isoformTooltip",
-        toolbar: "isoformToolbar",
-        clone: "isoformClone",
+        tooltip: `${rootId}-isoformTooltip`,
+        toolbar: `${rootId}-isoformToolbar`,
+        clone: `${rootId}-isoformClone`,
         buttons: {
-          save: "isoformSave"
+          save: `${rootId}-isoformSave`
         }
       };
       // build the dom components
